@@ -2,8 +2,13 @@ package pages;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import utilities.Driver;
+
+import java.time.Duration;
+import java.util.List;
 
 public class AddStudentPage {
 
@@ -15,6 +20,7 @@ public class AddStudentPage {
     private By submitBtn = By.id("submitBtn");
     private By firstRow = By.xpath("//tbody/tr");
     private By message = By.id("message"); // تأكدي من الـ id في صفحة الـ HTML
+    private String deleteButton = "//tr[contains(., '%s')]//button[@data-action='del']";
 
     public AddStudentPage enterFullName(String fullName) {
         Driver.getDriver().findElement(name).clear();
@@ -49,6 +55,7 @@ public class AddStudentPage {
         Driver.getDriver().findElement(submitBtn).click();
         return this;
     }
+
     public boolean isStudentAdded() {
         return Driver.getDriver().findElement(firstRow).isDisplayed();
     }
@@ -56,5 +63,19 @@ public class AddStudentPage {
     public String getErrorMessage() {
         WebElement errorMsg = Driver.getDriver().findElement(message);
         return errorMsg.getText().trim();
+    }
+
+    public AddStudentPage clickDeleteButtonContains(String studentName) {
+        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), Duration.ofSeconds(10));
+        By locator = By.xpath(String.format(deleteButton, studentName));
+
+        List<WebElement> elements = Driver.getDriver().findElements(locator);
+        if (!elements.isEmpty()) {
+            WebElement button = elements.get(0);
+            wait.until(ExpectedConditions.elementToBeClickable(button));
+            button.click();
+            Driver.getDriver().switchTo().alert().accept(); // قبول التنبيه
+        }
+        return this;
     }
 }
